@@ -26,19 +26,21 @@ const login = async (req, res) => {
 }
 
 const checkAuth = (req, res, next) => {
-    const header = req.get('Authorization')
-    const webtoken = header.substring(7)
-    if (!webtoken) 
-        return res.status(401).send({
-            message: "JWT inexistente"
-        }); 
-    jwt.verify(webtoken, SECRET, function(error) { 
-        if (error) 
-            return res.status(500).send({
-                message: error.message
-            });
-        next()
-    })
+    try {
+        const header = req.get('Authorization')
+        const webtoken = header.substring(7)
+        jwt.verify(webtoken, SECRET, function(error) { 
+            if (error) 
+                return res.status(500).send({
+                    message: error.message
+                });
+            next()
+        })
+    } catch (error) {
+        res.status(401).send({
+            message: "JWT Inexistente"
+        })
+    }
 }
 
 
