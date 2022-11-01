@@ -11,19 +11,18 @@ const getAll = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    const hashedPassword = bcrypt.hashSync(req.body.password, 10)
-    const {name, email, password} = req.body
-    req.body.password = hashedPassword
-    if (name && email && password) {
+    try {
+        const hashedPassword = bcrypt.hashSync(req.body.password, 10)
+        req.body.password = hashedPassword
         const newUser = new UserSchema(req.body)
         await newUser.save()
         res.status(201).send({
             message: "Usuário criado com sucesso",
             user: newUser
         })
-    } else {
+    } catch (error) {
         res.status(400).send({
-            message: "Campo(s) vazio(s)"
+        message: error
         })
     }
 }
