@@ -27,10 +27,17 @@ const createUser = async (req, res) => {
     }
 }
 
-//update de alguma informação
 const updateUserById = async (req, res) => {
+    await UserSchema.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        email: req.body.email
+    }) 
+        res.status(200).send({
+        message: "Usuário atualizado com sucesso"
+        })
+    }
 
-}
+        
 
 module.exports = {
     getAll,
