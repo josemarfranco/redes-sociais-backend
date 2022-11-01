@@ -1,6 +1,5 @@
 const UserSchema = require("../models/userSchema");
 const bcrypt = require("bcrypt");
-const { send } = require("process");
 
 const getAll = async (req, res) => {
     UserSchema.find(function (err, users) {
