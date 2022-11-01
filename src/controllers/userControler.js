@@ -15,11 +15,17 @@ const createUser = async (req, res) => {
         const hashedPassword = bcrypt.hashSync(req.body.password, 10)
         req.body.password = hashedPassword
         const newUser = new UserSchema(req.body)
-        await newUser.save()
-        res.status(201).send({
-            message: "Usuário criado com sucesso",
-            user: newUser
+        if (await UserSchema.findOne({email: req.body.email})) {
+            res.status(400).send({
+                message: "Usuário " + req.body.email + " já cadastrado"
+                })
+        } else {
+            await newUser.save()
+            res.status(201).send({
+                message: "Usuário criado com sucesso",
+                user: newUser
         })
+    }
     } catch (error) {
         res.status(400).send({
         message: error.message
@@ -27,8 +33,10 @@ const createUser = async (req, res) => {
     }
 }
 
-const updateUserById = (req, res) => {
-    UserSchema.findByIdAndUpdate(req.params.id, {name: req.body.name, email: req.body.email}, function (error, user) {
+const updateUserById = async (req, res) => {
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10)
+    req.body.password = hashedPassword
+    UserSchema.findByIdAndUpdate(req.params.id, {name: req.body.name, email: req.body.email, password: req.body.password}, function (error, user) {
         if (error){
             res.status(400).send({
             message: error.message
@@ -41,8 +49,8 @@ const updateUserById = (req, res) => {
     })
 }
 
-const deleteUserById = (req, res) => {
-    UserSchema.findByIdAndDelete(req.params.id, {name: req.body.name, email: req.body.email}, function (error, user) {
+const deleteUserById = async (req, res) => {
+    UserSchema.findByIdAndDelete(req.params.id, function (error, user) {
         if (error){
             res.status(400).send({
             message: error.message
@@ -58,9 +66,6 @@ const deleteUserById = (req, res) => {
         }
     })
 }
-    
-
-        
 
 module.exports = {
     getAll,
