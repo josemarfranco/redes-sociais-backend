@@ -27,20 +27,44 @@ const createUser = async (req, res) => {
     }
 }
 
-const updateUserById = async (req, res) => {
-    await UserSchema.findByIdAndUpdate(req.params.id, {
-        name: req.body.name,
-        email: req.body.email
-    }) 
-        res.status(200).send({
-        message: "Usuário atualizado com sucesso"
-        })
-    }
+const updateUserById = (req, res) => {
+    UserSchema.findByIdAndUpdate(req.params.id, {name: req.body.name, email: req.body.email}, function (error, user) {
+        if (error){
+            res.status(400).send({
+            message: error.message
+            })
+        } else {
+            res.status(200).send({
+            message: "Usuário atualizado com sucesso", user
+            })
+        }
+    })
+}
+
+const deleteUserById = (req, res) => {
+    UserSchema.findByIdAndDelete(req.params.id, {name: req.body.name, email: req.body.email}, function (error, user) {
+        if (error){
+            res.status(400).send({
+            message: error.message
+            })
+        } else if (user !== null){
+            res.status(200).send({
+            message: "Usuário removido com sucesso:", user
+            })
+        } else {
+            res.status(400).send({
+                message: "Usuário inexistente"
+            })
+        }
+    })
+}
+    
 
         
 
 module.exports = {
     getAll,
     createUser,
-    updateUserById
+    updateUserById,
+    deleteUserById
 };

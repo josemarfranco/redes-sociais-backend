@@ -8,6 +8,7 @@ const login = async (req, res, next) => {
         if (credentials && bcrypt.compareSync(password, credentials.password) === true) {
             console.log('checkCredentials OK (' + credentials.email + ')')
             res.status(200).send({
+                message: "Usuário validado com sucesso",
                 user: credentials
             })
         } else {
