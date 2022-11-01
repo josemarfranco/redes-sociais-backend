@@ -1,14 +1,17 @@
-const UserSchema = require('../models/userSchema');
-const bcrypt = require('bcrypt');
+const UserSchema = require('../models/userSchema')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const SECRET = process.env.SECRET
 
 const login = async (req, res) => {
     try {
         const {email, password} = req.body
-        let credentials = await UserSchema.findOne({"email": email})
+        const credentials = await UserSchema.findOne({"email": email})
+        const webtoken = jwt.sign(credentials.email, SECRET)
         if (credentials && bcrypt.compareSync(password, credentials.password) === true) {
             res.status(200).send({
-                message: "Usuário validado com sucesso",
-                user: credentials
+                message: "Usuário " + credentials.email + " (" + credentials._id + ") autenticado com sucesso.",
+                jwt: webtoken
             })
         } else {
             res.status(400).send({
@@ -22,6 +25,24 @@ const login = async (req, res) => {
     }
 }
 
+const checkAuth = (req, res, next) => {
+    const header = req.get('Authorization')
+    const webtoken = header.substring(7)
+    if (!webtoken) 
+        return res.status(401).send({
+            message: "JWT inexistente"
+        }); 
+    jwt.verify(webtoken, SECRET, function(error) { 
+        if (error) 
+            return res.status(500).send({
+                message: error.message
+            });
+        next()
+    })
+}
+
+
 module.exports = {
+    checkAuth,
     login
 };
