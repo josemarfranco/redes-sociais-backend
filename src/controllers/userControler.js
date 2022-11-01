@@ -1,5 +1,7 @@
 const UserSchema = require("../models/userSchema");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const { send } = require("process");
+
 const getAll = async (req, res) => {
     UserSchema.find(function (err, users) {
         if (err) {
@@ -10,36 +12,23 @@ const getAll = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    //console.log("SENHA ANTES DO HASH", req.body.password)
     const hashedPassword = bcrypt.hashSync(req.body.password, 10)
-    //console.log("SENHA DEPOIS DO HASH", hashedPassword, "SENHA DO BODY", req.body.password)
+    const {name, email, password} = req.body
     req.body.password = hashedPassword
-
-    //console.log("COMO ESTÁ O REQ BODY?", req.body.password)
-
-    try {
-        const findUser = await UserSchema.findById(req.params.id);
-
-        if (findUser) {
-            findUser.name = req.body.name || find.name;
-            findUser.email = req.body.email || find.email;
-
-        }
-        // acessar as informações que vem no body da requisição
-        const newUser = new UserSchema(req.body);
-
-        // criar o novo usuário
-        const savedUser = await findUser.save();
-
-        // enviar uma resposta
+    if (name && email && password) {
+        const newUser = new UserSchema(req.body)
+        await newUser.save()
         res.status(201).send({
             message: "Usuário criado com sucesso",
-            savedUser
+            user: newUser
         })
-    } catch (error) {
-        console.error(error)
+    } else {
+        res.status(400).send({
+            message: "Campo(s) vazio(s)"
+        })
     }
-};
+}
+
 //update de alguma informação
 const updateUserById = async (req, res) => {
 
